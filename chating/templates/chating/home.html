@@ -1,0 +1,15 @@
+{% extends 'main.html' %}
+{% block content %}
+<div class="container">
+    <h1 class="title_head">🤖 NexaMind AI</h1>
+    <a href="{% url 'new_chat' %}" class="new-chat-btn">+ Start New Chat</a>
+
+    <ul class="chat-list">
+        {% for c in conversations %}
+            <li><a href="{% url 'chat_room' c.id %}">{{ c.title }}</a></li>
+        {% empty %}
+            <p>No chats yet — start one above.</p>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

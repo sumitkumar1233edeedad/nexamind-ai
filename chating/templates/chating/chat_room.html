@@ -1,0 +1,45 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+
+<div class="chat-layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="{% url 'new_chat' %}" class="new-chat-btn">+ New Chat</a>
+        <ul class="chat-list">
+            {% for c in conversations %}
+                <li class="{% if c.id == conversation.id %}active{% endif %}">
+                    <a href="{% url 'chat_room' c.id %}">{{ c.title }}</a>
+                    <a href="{% url 'delete_chat' c.id %}" class="delete-btn">🗑</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Active conversation -->
+    <div class="chat-main">
+        <h2>{{ conversation.title }}</h2>
+
+        <div class="chat-box">
+            {% for msg in chat_history %}
+                <div class="ai-message">
+                    <p><strong>You:</strong> {{ msg.user_input }}</p>
+                    <p><strong>AI:</strong> {{ msg.reply }}</p>
+                </div>
+            {% empty %}
+                <p>Say hello to start this chat 👋</p>
+            {% endfor %}
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-area">
+                <input type="text" name="message" placeholder="Type your message here..." required>
+                <button type="submit">Send</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
