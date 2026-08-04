@@ -1,28 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-theme="dark">
 <head>
     {% load static %}
-    <title>NexaMind</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaMind AI</title>
+    
+    <!-- Static files -->
     <script src="{% static 'js/script.js' %}" defer></script>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="icon" type="image/png" href="{% static 'm2.png' %}">
-
+    <link rel="icon" type="image/png" href="{% static 'photo/m2.png' %}">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-
     {% block content %}
     {% endblock %}
-<div id="delete-modal-overlay" class="delete-modal-overlay">
-    <div class="delete-modal">
-        <h3>Delete chat?</h3>
-        <p>This will permanently delete this conversation. This action cannot be undone.</p>
-        <div class="delete-modal-actions">
-            <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-            <button type="button" class="btn-delete" onclick="confirmDelete()">Delete</button>
+
+    <!-- Delete Modal -->
+    <div id="delete-modal-overlay" class="delete-modal-overlay">
+        <div class="delete-modal">
+            <div class="delete-modal-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Delete Conversation?</h3>
+            </div>
+            <p>This action will permanently delete this conversation. All messages will be lost and cannot be recovered.</p>
+            <div class="delete-modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeDeleteModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn-delete" onclick="confirmDelete()">
+                    <i class="fas fa-trash-alt"></i> Delete Forever
+                </button>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        });
+    </script>
 </body>
- 
 </html>
