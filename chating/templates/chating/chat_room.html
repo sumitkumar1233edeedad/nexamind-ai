@@ -3,61 +3,154 @@
 {% block content %}
 
 <div class="chat-layout">
-
     <!-- Sidebar -->
-    <div class="sidebar">
-        <a href="{% url 'new_chat' %}" class="new-chat-btn">+ New Chat</a>
-        <ul class="chat-list">
-            {% for c in conversations %}
-                <li class="{% if c.id == conversation.id %}active{% endif %}">
-                    <a href="{% url 'chat_room' c.id %}">{{ c.title }}</a>
-                    <form action="{% url 'delete_chat' c.id %}" method="post" class="delete-form" id="delete-form-{{ c.id }}">
-                        {% csrf_token %}
-                        <button type="button" class="delete-btn" onclick="openDeleteModal('{{ c.id }}')">🗑</button>
-                    </form>
-                </li>
-            {% endfor %}
-        </ul>
-        <!-- User profile -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="{% url 'home' %}" class="brand-link">
+                <i class="fas fa-brain"></i>
+                 
+                <span>NexaMind</span>
+            </a>
+            <button class="sidebar-close" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <a href="{% url 'new_chat' %}" class="new-chat-btn sidebar-btn">
+            <i class="fas fa-plus"></i> New Chat
+        </a>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="chat-list-container">
+            <ul class="chat-list">
+                {% for c in conversations %}
+                    <li class="{% if c.id == conversation.id %}active{% endif %}">
+                        <a href="{% url 'chat_room' c.id %}">
+                            <i class="fas fa-comment"></i>
+                            <span class="chat-title">{{ c.title|truncatechars:20 }}</span>
+                        </a>
+                        <form action="{% url 'delete_chat' c.id %}" method="post" class="delete-form" id="delete-form-{{ c.id }}">
+                            {% csrf_token %}
+                            <button type="button" class="delete-btn" onclick="openDeleteModal('{{ c.id }}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- User Profile -->
         <div class="sidebar-profile">
-            <button class="profile-trigger" onclick="document.getElementById('profileMenu').classList.toggle('open')">
-                <span class="profile-avatar">{{ request.user.username|slice:":1"|upper }}</span>
+            <button class="profile-trigger" onclick="toggleProfileMenu()">
+                <div class="profile-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    {{ request.user.username|slice:":1"|upper }}
+                </div>
                 <span class="profile-name">{{ request.user.username }}</span>
-                <span class="profile-chevron">⌄</span>
+                <i class="fas fa-chevron-down profile-chevron"></i>
             </button>
             <div class="profile-menu" id="profileMenu">
-                <a href="{% url 'logout' %}" class="profile-menu-item">Log out</a>
+                <a href="#" class="profile-menu-item">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+                <a href="#" class="profile-menu-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <div class="menu-divider"></div>
+                <a href="{% url 'logout' %}" class="profile-menu-item danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
             </div>
         </div>
-    </div>
+    </aside>
 
-    
+    <!-- Main Chat Area -->
+    <main class="chat-main">
+        <div class="chat-header">
+            <div class="chat-header-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="chat-header-info">
+                    <h2>
+                        <i class="fas fa-robot"></i>
+                        {{ conversation.title }}
+                    </h2>
+                    <span class="chat-status">
+                        <span class="status-dot"></span>
+                        Online
+                    </span>
+                </div>
+            </div>
+            <!-- <div class="chat-header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="header-action" title="Export Chat">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div> -->
+        </div>
 
-    <!-- Active conversation -->
-    <div class="chat-main">
-        <h2>{{ conversation.title }}</h2>
-
-        <div class="chat-box">
+        <div class="chat-box" id="chatBox">
             {% for msg in chat_history %}
-                <div class="ai-message">
-                    <p><strong>You:</strong> {{ msg.user_input }}</p>
+                <div class="message-wrapper user-message">
+                    <div class="message-avatar">
+                        <div class="avatar-circle" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                            {{ request.user.username|slice:":1"|upper }}
+                        </div>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="sender-name">You</span>
+                            <span class="message-time">{{ msg.created_at|time:"g:i A" }}</span>
+                        </div>
+                        <div class="message-bubble user-bubble">
+                            {{ msg.user_input }}
+                        </div>
+                    </div>
                 </div>
-                <div class="reply-message">
-                    <p><strong>AI</strong> {{ msg.reply_html|safe }}</p>
+
+                <div class="message-wrapper ai-message">
+                    <div class="message-avatar">
+                        <div class="avatar-circle" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="sender-name">NexaMind AI</span>
+                            <span class="message-time">{{ msg.created_at|time:"g:i A" }}</span>
+                        </div>
+                        <div class="message-bubble ai-bubble">
+                            {{ msg.reply_html|safe }}
+                        </div>
+                    </div>
                 </div>
-            {% empty %}     
-                <p>Say hello to start this chat 👋</p>
+            {% empty %}
+                <div class="empty-chat-state">
+                    <div class="empty-chat-icon">
+                        <i class="fas fa-hand-peace"></i>
+                    </div>
+                    <h3>Say hello to start this chat 👋</h3>
+                    <p>Ask me anything, and I'll do my best to help you out!</p>
+                </div>
             {% endfor %}
         </div>
 
-        <form method="post">
+        <form method="post" class="chat-form" id="chatForm">
             {% csrf_token %}
             <div class="input-area">
-                <input type="text" name="message" placeholder="Type your message here..." required>
-                <button type="submit">Send</button>
+                <button type="button" class="attach-btn" title="Attach file">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <input type="text" name="message" placeholder="Type your message here..." required autocomplete="off">
+                <button type="submit" class="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
             </div>
         </form>
-    </div>
-
+    </main>
 </div>
 {% endblock %}
