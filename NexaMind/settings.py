@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-hh*3+y1kcmu@=3z)d!=dv&bld8r%^$sg@9=w=z3xvtwlj^yi-q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -128,3 +129,11 @@ STATICFILES_DIRS = [
 
 
 LOGIN_URL = 'login'  # matches name='login' in your urls.py
+
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'   # ADD THIS
+STORAGES = {                              # ADD THIS
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
