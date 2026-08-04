@@ -4,12 +4,23 @@
     {% load static %}
     <title>NexaMind</title>
 
+    <script src="{% static 'js/script.js' %}" defer></script>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 
     {% block content %}
     {% endblock %}
-
+<div id="delete-modal-overlay" class="delete-modal-overlay">
+    <div class="delete-modal">
+        <h3>Delete chat?</h3>
+        <p>This will permanently delete this conversation. This action cannot be undone.</p>
+        <div class="delete-modal-actions">
+            <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <button type="button" class="btn-delete" onclick="confirmDelete()">Delete</button>
+        </div>
+    </div>
+</div>
 </body>
+ 
 </html>

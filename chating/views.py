@@ -7,7 +7,41 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Conversation, ChatMessage
+import markdown
+from django.http import JsonResponse
+import bleach
+import markdown
 
+ALLOWED_TAGS = [
+    'p', 'br', 'strong', 'em', 'ul', 'ol', 'li',
+    'pre', 'code', 'blockquote', 'a',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'table', 'thead', 'tbody', 'tr', 'th', 'td',
+    'span', 'hr',
+]
+
+ALLOWED_ATTRS = {
+    'a': ['href', 'title', 'rel'],
+    'code': ['class'],   # needed for hljs language classes like "language-python"
+    'span': ['class'],
+    'th': ['align'],
+    'td': ['align'],
+}
+
+def render_ai_reply(raw_text: str) -> str:
+    """Convert AI markdown to HTML, then strip anything dangerous."""
+    html = markdown.markdown(
+        raw_text,
+        extensions=["extra", "codehilite", "fenced_code", "toc"],
+    )
+    clean_html = bleach.clean(
+        html,
+        tags=ALLOWED_TAGS,
+        attributes=ALLOWED_ATTRS,
+        protocols=['http', 'https', 'mailto'],
+        strip=True,          # remove disallowed tags instead of escaping them
+    )
+    return clean_html
 
 # Create your views here.
 
@@ -101,9 +135,12 @@ def chat_room(request, conversation_id):
     conversations = Conversation.objects.filter(user=request.user)
 
     if request.method == "POST":
-        user_input = request.POST.get("message", "")
+        user_input = request.POST.get("message", "").strip()
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
         if not user_input:
+            if is_ajax:
+                return JsonResponse({"error": "Please enter a message."}, status=400)
             messages.error(request, "Please enter a message.")
             return redirect("chat_room", conversation_id=conversation.id)
 
@@ -122,6 +159,8 @@ def chat_room(request, conversation_id):
             )
             reply = completion.choices[0].message.content
         except Exception:
+            if is_ajax:
+                return JsonResponse({"error": "Something went wrong talking to the AI. Please try again."}, status=500)
             messages.error(request, "Something went wrong talking to the AI. Please try again.")
             return redirect("chat_room", conversation_id=conversation.id)
 
@@ -131,20 +170,32 @@ def chat_room(request, conversation_id):
             reply=reply
         )
 
-        # Auto-title the conversation from the first message
         if conversation.title == "New Chat":
             conversation.title = user_input[:40]
             conversation.save()
 
+        if is_ajax:
+            reply_html = render_ai_reply(reply)
+            return JsonResponse({
+                "user_input": user_input,
+                "reply_html": reply_html,
+            })
+
         return redirect("chat_room", conversation_id=conversation.id)
 
+     
+    # GET branch — rendering history
     chat_history = conversation.messages.all()
+    for chat in chat_history:
+        chat.reply_html = render_ai_reply(chat.reply)
 
     return render(request, "chating/chat_room.html", {
         "conversation": conversation,
         "conversations": conversations,
         "chat_history": chat_history
     })
+ 
+
 
 
 @login_required

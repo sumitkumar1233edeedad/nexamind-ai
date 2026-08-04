@@ -11,11 +11,27 @@
             {% for c in conversations %}
                 <li class="{% if c.id == conversation.id %}active{% endif %}">
                     <a href="{% url 'chat_room' c.id %}">{{ c.title }}</a>
-                    <a href="{% url 'delete_chat' c.id %}" class="delete-btn">🗑</a>
+                    <form action="{% url 'delete_chat' c.id %}" method="post" class="delete-form" id="delete-form-{{ c.id }}">
+                        {% csrf_token %}
+                        <button type="button" class="delete-btn" onclick="openDeleteModal('{{ c.id }}')">🗑</button>
+                    </form>
                 </li>
             {% endfor %}
         </ul>
+        <!-- User profile -->
+        <div class="sidebar-profile">
+            <button class="profile-trigger" onclick="document.getElementById('profileMenu').classList.toggle('open')">
+                <span class="profile-avatar">{{ request.user.username|slice:":1"|upper }}</span>
+                <span class="profile-name">{{ request.user.username }}</span>
+                <span class="profile-chevron">⌄</span>
+            </button>
+            <div class="profile-menu" id="profileMenu">
+                <a href="{% url 'logout' %}" class="profile-menu-item">Log out</a>
+            </div>
+        </div>
     </div>
+
+    
 
     <!-- Active conversation -->
     <div class="chat-main">
@@ -25,9 +41,11 @@
             {% for msg in chat_history %}
                 <div class="ai-message">
                     <p><strong>You:</strong> {{ msg.user_input }}</p>
-                    <p><strong>AI:</strong> {{ msg.reply }}</p>
                 </div>
-            {% empty %}
+                <div class="reply-message">
+                    <p><strong>AI</strong> {{ msg.reply_html|safe }}</p>
+                </div>
+            {% empty %}     
                 <p>Say hello to start this chat 👋</p>
             {% endfor %}
         </div>
