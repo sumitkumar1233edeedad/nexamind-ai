@@ -26,7 +26,7 @@ NexaMind is an AI-powered chatbot built using Django and Large Language Models (
 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/NexaMind.git
+git clone https://github.com/sumitkumar1233edeedad/NexaMind.git
 ```
 
 2. Navigate to the project
