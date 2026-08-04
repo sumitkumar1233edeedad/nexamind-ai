@@ -1,26 +1,54 @@
 {% extends 'main.html' %}
 {% block content %}
 <div class="home-shell">
-
+    <!-- Navigation -->
     <header class="home-nav">
         <div class="brand-mark">
             <span class="dot"></span>
+            <i class="fas fa-brain"></i>
             NexaMind AI
         </div>
-        <div class="nav-profile">
-            <span class="profile-avatar">{{ request.user.username|slice:":1"|upper }}</span>
-            <span class="profile-name">{{ request.user.username }}</span>
+        <div class="nav-controls">
+            <!-- <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                <i class="fas fa-moon"></i>
+            </button> -->
+            <div class="nav-profile">
+                <div class="profile-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    {{ request.user.username|slice:":1"|upper }}
+                </div>
+                <span class="profile-name">{{ request.user.username }}</span>
+                <div class="profile-dropdown">
+                    <button class="dropdown-trigger" onclick="toggleDropdown(event)">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu" id="profileDropdown">
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'logout' %}" class="dropdown-item danger">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
     <div class="container">
         <div class="container-head">
             <div>
-                <h1 class="title_head">Your conversations</h1>
-                <p class="subtitle">Pick up an old thread or start something new.</p>
+                <h1 class="title_head">
+                    <i class="fas fa-comments"></i> Your Conversations
+                </h1>
+                <p class="subtitle">Pick up where you left off or start something new</p>
             </div>
             <a href="{% url 'new_chat' %}" class="new-chat-btn">
-                <span>+ Start New Chat</span>
+                <i class="fas fa-plus-circle"></i>
+                <span>New Chat</span>
             </a>
         </div>
 
@@ -28,24 +56,34 @@
             {% for c in conversations %}
                 <li>
                     <a href="{% url 'chat_room' c.id %}">
-                        <span class="chat-icon">💬</span>
+                        <span class="chat-icon">
+                            <i class="fas fa-comment-dots"></i>
+                        </span>
                         <span class="chat-info">
                             <span class="chat-title">{{ c.title }}</span>
-                            <span class="chat-meta">Updated {{ c.updated_at|timesince }} ago</span>
+                            <span class="chat-meta">
+                                <i class="far fa-clock"></i>
+                                Updated {{ c.updated_at|timesince }} ago
+                            </span>
                         </span>
-                        <span class="chat-arrow">→</span>
+                        <span class="chat-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </span>
                     </a>
                 </li>
             {% empty %}
                 <li class="empty-state">
-                    <span class="empty-icon">✨</span>
-                    <p class="empty-title">No chats yet</p>
-                    <p class="empty-subtitle">Start a new conversation to see it here.</p>
-                    <a href="{% url 'new_chat' %}" class="new-chat-btn">+ Start New Chat</a>
+                    <div class="empty-icon">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <p class="empty-title">No conversations yet</p>
+                    <p class="empty-subtitle">Start your first chat to begin your AI journey</p>
+                    <a href="{% url 'new_chat' %}" class="new-chat-btn primary">
+                        <i class="fas fa-plus-circle"></i> Start New Chat
+                    </a>
                 </li>
             {% endfor %}
         </ul>
     </div>
-
 </div>
 {% endblock %}
