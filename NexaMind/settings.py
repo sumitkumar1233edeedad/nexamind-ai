@@ -16,7 +16,8 @@ from dotenv import load_dotenv
 
 load_dotenv()  # loads .env into os.environ
 
-NVIDIA_API_KEY = os.environ.get("NVIDIA_API_KEY")
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("openrouter_api_key")
+TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

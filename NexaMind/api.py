@@ -1,26 +1,38 @@
-from openai import OpenAI
+import os
+import sys
+from pathlib import Path
+from dotenv import load_dotenv
 
-client = OpenAI(
-  base_url = "https://integrate.api.nvidia.com/v1",
-  api_key = "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"
-)
+# Ensure stdout uses utf-8 encoding on Windows consoles
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR))
 
-completion = client.chat.completions.create(
-  model="nvidia/nemotron-3-ultra-550b-a55b",
-  messages=[{"role":"user","content":""}],
-  temperature=1,
-  top_p=0.95,
-  max_tokens=16384,
-  extra_body={"chat_template_kwargs":{"enable_thinking":True},"reasoning_budget":16384},
-  stream=True
-)
+load_dotenv(BASE_DIR / ".env")
 
-for chunk in completion:
-  if not chunk.choices:
-    continue
-  reasoning = getattr(chunk.choices[0].delta, "reasoning_content", None)
-  if reasoning:
-    print(reasoning, end="")
-  if chunk.choices[0].delta.content is not None:
-    print(chunk.choices[0].delta.content, end="")
+from chating.agent import get_agent, TOOLS
+from langchain_core.messages import HumanMessage
+
+def test_nexamind_cli():
+    print("=" * 60)
+    print("NexaMind AI (LangGraph + LangChain + OpenRouter gpt-4o-mini)")
+    print("=" * 60)
+    print(f"Loaded {len(TOOLS)} Tools: {[t.name for t in TOOLS]}")
+    
+    agent = get_agent()
+    
+    sample_queries = [
+        "What is 12345 * 6789?",
+        "What is the current date and time?",
+    ]
+    
+    for q in sample_queries:
+        print(f"\nQuery: {q}")
+        print("-" * 50)
+        res = agent.invoke({"messages": [HumanMessage(content=q)]})
+        print(f"Response:\n{res['messages'][-1].content}\n")
+
+if __name__ == "__main__":
+    test_nexamind_cli()

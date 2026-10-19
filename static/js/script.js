@@ -139,9 +139,20 @@ function parseMarkdown(text) {
 }
 
 // ===== RENDER AI RESPONSE =====
-function renderAiResponse(element, rawText) {
+function renderAiResponse(element, htmlOrMarkdown) {
     if (!element) return;
-    element.innerHTML = parseMarkdown(rawText);
+    if (!htmlOrMarkdown) {
+        element.innerHTML = '';
+        return;
+    }
+
+    // If string already contains rendered HTML tags from Django, don't double-parse markdown
+    const hasHtmlTags = /<(?:p|pre|code|ul|ol|li|h[1-6]|table|blockquote|strong|em|span|div)/i.test(htmlOrMarkdown);
+    if (hasHtmlTags) {
+        element.innerHTML = htmlOrMarkdown;
+    } else {
+        element.innerHTML = parseMarkdown(htmlOrMarkdown);
+    }
     
     element.querySelectorAll('pre code').forEach(el => {
         if (typeof hljs !== 'undefined' && hljs.highlightElement) {
@@ -425,4 +436,14 @@ function getPasswordStrength(password) {
     ];
 
     return strengths[Math.min(score, strengths.length - 1)];
+}
+
+// ===== SUGGESTION CHIP CLICK HANDLER =====
+function applySuggestion(text) {
+    const form = document.getElementById('chatForm') || document.querySelector('.chat-form');
+    const input = form ? form.querySelector('input[name="message"]') : null;
+    if (input) {
+        input.value = text;
+        input.focus();
+    }
 }

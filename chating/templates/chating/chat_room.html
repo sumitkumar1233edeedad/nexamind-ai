@@ -74,23 +74,26 @@
                 </button>
                 <div class="chat-header-info">
                     <h2>
-                        <i class="fas fa-robot"></i>
+                        <i class="fas fa-brain"></i>
                         {{ conversation.title }}
                     </h2>
-                    <span class="chat-status">
-                        <span class="status-dot"></span>
-                        Online
-                    </span>
+                    <div class="chat-badges">
+                        <span class="chat-status">
+                            <span class="status-dot"></span>
+                            Online
+                        </span>
+                        <span class="chat-badge model-badge">
+                            <i class="fas fa-microchip"></i> GPT-4o-mini
+                        </span>
+                        <span class="chat-badge tool-badge" title="Tavily Live Web Search Enabled">
+                            <i class="fas fa-globe"></i> Web Search
+                        </span>
+                        <span class="chat-badge tool-badge" title="Math Calculator Enabled">
+                            <i class="fas fa-calculator"></i> Calculator
+                        </span>
+                    </div>
                 </div>
             </div>
-            <!-- <div class="chat-header-actions">
-                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <button class="header-action" title="Export Chat">
-                    <i class="fas fa-download"></i>
-                </button>
-            </div> -->
         </div>
 
         <div class="chat-box" id="chatBox">
@@ -131,10 +134,24 @@
             {% empty %}
                 <div class="empty-chat-state">
                     <div class="empty-chat-icon">
-                        <i class="fas fa-hand-peace"></i>
+                        <i class="fas fa-brain"></i>
                     </div>
-                    <h3>Say hello to start this chat 👋</h3>
-                    <p>Ask me anything, and I'll do my best to help you out!</p>
+                    <h3>Welcome to NexaMind AI 👋</h3>
+                    <p>Powered by <strong>LangGraph</strong> & <strong>LangChain</strong> with real-time web search and mathematical calculation tools.</p>
+                    <div class="suggestion-chips">
+                        <button type="button" class="suggestion-chip" onclick="applySuggestion('Search the web for the latest artificial intelligence developments in 2026')">
+                            <i class="fas fa-globe"></i> Latest AI News (2026)
+                        </button>
+                        <button type="button" class="suggestion-chip" onclick="applySuggestion('Calculate: (4532 * 879) / 12 + sqrt(1048576)')">
+                            <i class="fas fa-calculator"></i> Advanced Math
+                        </button>
+                        <button type="button" class="suggestion-chip" onclick="applySuggestion('What is today\'s exact date, time, and day of the week?')">
+                            <i class="far fa-clock"></i> Current Date & Time
+                        </button>
+                        <button type="button" class="suggestion-chip" onclick="applySuggestion('Explain quantum computing and superposition with a real-world example')">
+                            <i class="fas fa-lightbulb"></i> Quantum Computing
+                        </button>
+                    </div>
                 </div>
             {% endfor %}
         </div>

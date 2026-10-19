@@ -1,14 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
-from openai import OpenAI
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Conversation, ChatMessage
-import markdown
 from django.http import JsonResponse
+from .models import Conversation, ChatMessage
+from .agent import generate_chat_response
 import bleach
 import markdown
 
@@ -21,7 +19,7 @@ ALLOWED_TAGS = [
 ]
 
 ALLOWED_ATTRS = {
-    'a': ['href', 'title', 'rel'],
+    'a': ['href', 'title', 'rel', 'target'],
     'code': ['class'],   # needed for hljs language classes like "language-python"
     'span': ['class'],
     'th': ['align'],
@@ -44,12 +42,6 @@ def render_ai_reply(raw_text: str) -> str:
     return clean_html
 
 # Create your views here.
-
-
-client = OpenAI(
-    base_url="https://integrate.api.nvidia.com/v1",
-    api_key=settings.NVIDIA_API_KEY
-)
 
 
 def login_user(request):
@@ -145,23 +137,11 @@ def chat_room(request, conversation_id):
             return redirect("chat_room", conversation_id=conversation.id)
 
         try:
-            completion = client.chat.completions.create(
-                model="nvidia/nemotron-3-ultra-550b-a55b",
-                messages=[{"role": "user", "content": user_input}],
-                temperature=1,
-                top_p=0.95,
-                max_tokens=16384,
-                extra_body={
-                    "chat_template_kwargs": {"enable_thinking": True},
-                    "reasoning_budget": 16384
-                },
-                stream=False
-            )
-            reply = completion.choices[0].message.content
-        except Exception:
+            reply = generate_chat_response(conversation, user_input)
+        except Exception as e:
             if is_ajax:
-                return JsonResponse({"error": "Something went wrong talking to the AI. Please try again."}, status=500)
-            messages.error(request, "Something went wrong talking to the AI. Please try again.")
+                return JsonResponse({"error": f"NexaMind Error: {str(e)}"}, status=500)
+            messages.error(request, f"NexaMind Error: {str(e)}")
             return redirect("chat_room", conversation_id=conversation.id)
 
         ChatMessage.objects.create(
@@ -171,7 +151,7 @@ def chat_room(request, conversation_id):
         )
 
         if conversation.title == "New Chat":
-            conversation.title = user_input[:40]
+            conversation.title = (user_input[:35] + "...") if len(user_input) > 35 else user_input
             conversation.save()
 
         if is_ajax:
